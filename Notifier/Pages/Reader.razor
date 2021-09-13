@@ -15,10 +15,10 @@
 </ul>
 
 @code {
-    private HubConnection hubConnection;
+    private HubConnection hubConnection = null!;
     private List<string> messages = new List<string>();
     
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/notifierhub"))

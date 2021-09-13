@@ -18,10 +18,10 @@
 <hr>
 
 @code {
-    private HubConnection hubConnection;
+    private HubConnection hubConnection = null!;
 
-    private string messageInput;
-    private string readersCount;
+    private string messageInput = null!;
+    private string readersCount = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -29,7 +29,7 @@
             .WithUrl(NavigationManager.ToAbsoluteUri("/notifierhub"))
             .Build();
             
-        hubConnection.On<Hubs.NotifierInfo>("ReceiveInfo", (info) =>
+        hubConnection.On<Models.NotifierInfo>("ReceiveInfo", (info) =>
         {
             readersCount = info.ReadersCount.ToString();
             StateHasChanged();
