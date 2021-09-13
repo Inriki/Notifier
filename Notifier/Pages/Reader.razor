@@ -1,0 +1,61 @@
+﻿@page "/reader"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+
+@implements IAsyncDisposable
+
+<button @onclick="Subscribe" disabled="@(IsConnected)">Subscribe</button>
+<button @onclick="Unsubscribe" disabled="@(!IsConnected)">Unsubscribe</button>
+
+<ul id="messagesList">
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+
+@code {
+    private HubConnection hubConnection;
+    private List<string> messages = new List<string>();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/notifierhub"))
+            .Build();
+
+        hubConnection.On<string>("ReceiveMessage", (message) =>
+        {
+            messages.Add(message);
+            StateHasChanged();
+        });       
+        
+        hubConnection.On<int>("ReceiveInfo", (message) =>
+        {
+            messages.Add(message.ToString());
+            StateHasChanged();
+        });  
+    }
+
+    async Task Subscribe()
+    {
+        await hubConnection.StartAsync();
+    }
+
+    async Task Unsubscribe()
+    {
+        await hubConnection.StopAsync();
+    }
+
+
+    public bool IsConnected =>
+        hubConnection.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
